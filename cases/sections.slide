@@ -1,0 +1,42 @@
+Title of document
+Subtitle of document
+15:04 2 Jan 2006
+
+Author Name
+Job title, Company
+joe@example.com
+http://url/
+@twitter_name
+
+
+
+* Title of slide or section (must have asterisk)
+
+Some Text
+
+** Subsection
+
+- bullets
+- more bullets
+- a bullet with
+
+*** Sub-subsection
+
+Some More text
+
+  Preformatted text
+  is indented (however you like)
+
+
+* Further Text, including invocations like:
+
+
+Again, more text
+
+* Inline text
+
+Hello this is *Felix Sun*, His birthday is _2011/01/02_, He is writting `Golang`
+
+And He worked at **The Plant**
+
+
