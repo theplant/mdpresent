@@ -9,11 +9,12 @@ import (
 )
 
 type PresentContent struct {
-	htmlRender    blackfriday.Renderer
-	sections      []*Section
-	parentSection *Section
-	lastSection   *Section
-	lastList      []string
+	htmlRender        blackfriday.Renderer
+	sections          []*Section
+	parentSection     *Section
+	lastSection       *Section
+	lastList          []string
+	lastSectionNumber []int
 }
 
 func PresentContentRenderer(flags int) (r *PresentContent) {
@@ -35,15 +36,11 @@ func (pc *PresentContent) Header(out *bytes.Buffer, text func() bool, level int)
 		return
 	}
 
-	var parentNumber []int
-	if pc.parentSection != nil && len(pc.parentSection.Number) < level {
-		parentNumber = pc.parentSection.Number
-	}
-
 	pc.lastSection = &Section{
-		Number: levelNumber(parentNumber, level),
+		Number: levelNumber(pc.lastSectionNumber, level),
 		Title:  content,
 	}
+	pc.lastSectionNumber = pc.lastSection.Number
 	pc.sections = append(pc.sections, pc.lastSection)
 
 	if pc.parentSection == nil || len(pc.parentSection.Number) < level {
@@ -69,10 +66,20 @@ func splitLines(txt string) (lines []string) {
 	return
 }
 
-func levelNumber(parentNumber []int, level int) (r []int) {
-	r = parentNumber
-	for i := len(parentNumber); i < level; i++ {
-		r = append(r, 1)
+func levelNumber(lastSectionNumber []int, level int) (r []int) {
+	if len(lastSectionNumber) >= level {
+		r = append(r, lastSectionNumber[0:level-1]...)
+		last := lastSectionNumber[level-1]
+		r = append(r, last+1)
+		return
+	}
+
+	for i := 0; i < level; i++ {
+		if len(lastSectionNumber) > i {
+			r = append(r, lastSectionNumber[i])
+		} else {
+			r = append(r, 1)
+		}
 	}
 	return
 }
