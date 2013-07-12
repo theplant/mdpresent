@@ -271,3 +271,18 @@ func (pc *PresentContent) TocFinalize() {
 	log.Println("TocFinalize")
 	return
 }
+
+func (pc *PresentContent) FootnoteItem(out *bytes.Buffer, name, text []byte, flags int) {
+	log.Println("FootnoteItem")
+	return
+}
+
+func (pc *PresentContent) FootnoteRef(out *bytes.Buffer, ref []byte, id int) {
+	log.Println("FootnoteRef")
+	return
+}
+
+func (pc *PresentContent) Footnotes(out *bytes.Buffer, text func() bool) {
+	log.Println("Footnotes")
+	return
+}
