@@ -175,16 +175,13 @@ func readLines(r io.Reader) (*Lines, error) {
 }
 
 func (l *Lines) next() (text string, ok bool) {
-	for {
-		current := l.line
-		l.line++
-		if current >= len(l.text) {
-			return "", false
-		}
-		text = l.text[current]
-		ok = true
-		break
+	current := l.line
+	l.line++
+	if current >= len(l.text) {
+		return "", false
 	}
+	text = l.text[current]
+	ok = true
 	return
 }
 
