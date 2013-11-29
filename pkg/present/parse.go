@@ -269,6 +269,7 @@ func parseMarkdownSections(name string, lines *Lines, number []int, doc *Doc) (r
 	extensions |= blackfriday.EXTENSION_SPACE_HEADERS
 	blackfriday.Markdown(body, renderer, extensions)
 	r = renderer.Sections()
+
 	return
 }
 

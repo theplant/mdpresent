@@ -15,6 +15,7 @@ type PresentContent struct {
 	lastSection       *Section
 	lastList          []string
 	lastSectionNumber []int
+	textBuffer        *Text
 }
 
 func PresentContentRenderer(flags int) (r *PresentContent) {
@@ -31,9 +32,14 @@ func (pc *PresentContent) Sections() (r []Section) {
 
 func (pc *PresentContent) Header(out *bytes.Buffer, text func() bool, level int) {
 	// pc.htmlRender.Header(content, text, level)
-	content, extracted := textExtract(out, text)
+	content, extracted := extractText(out, text)
 	if !extracted {
 		return
+	}
+
+	if pc.lastSection != nil && pc.textBuffer != nil {
+		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
+		pc.textBuffer = nil
 	}
 
 	pc.lastSection = &Section{
@@ -49,7 +55,7 @@ func (pc *PresentContent) Header(out *bytes.Buffer, text func() bool, level int)
 	log.Println("Header", content)
 }
 
-func textExtract(out *bytes.Buffer, text func() bool) (r string, extracted bool) {
+func extractText(out *bytes.Buffer, text func() bool) (r string, extracted bool) {
 	marker := out.Len()
 	if !text() {
 		out.Truncate(marker)
@@ -57,12 +63,6 @@ func textExtract(out *bytes.Buffer, text func() bool) (r string, extracted bool)
 	}
 	extracted = true
 	r = string(out.Bytes()[marker:])
-	return
-}
-
-func splitLines(txt string) (lines []string) {
-	txt = strings.Replace(txt, "\r", "", -1)
-	lines = strings.Split(txt, "\n")
 	return
 }
 
@@ -84,6 +84,149 @@ func levelNumber(lastSectionNumber []int, level int) (r []int) {
 	return
 }
 
+func (pc *PresentContent) BlockCode(out *bytes.Buffer, text []byte, lang string) {
+	code := Code{
+		Text: template.HTML(cleanEscapeHighlightCode(text, "")),
+	}
+
+	pc.lastSection.Elem = append(pc.lastSection.Elem, code)
+	log.Println("BlockCode", string(text), lang)
+	return
+}
+
+func (pc *PresentContent) List(out *bytes.Buffer, text func() bool, flags int) {
+	_, extracted := extractText(out, text)
+	if !extracted {
+		return
+	}
+	list := List{
+		Bullet: pc.lastList,
+	}
+	pc.lastSection.Elem = append(pc.lastSection.Elem, list)
+	pc.lastList = []string{}
+	log.Println("List", flags)
+	return
+}
+
+func (pc *PresentContent) ListItem(out *bytes.Buffer, text []byte, flags int) {
+	if pc.textBuffer != nil {
+		if len(pc.textBuffer.Lines) == 0 || pc.textBuffer.Lines[0] != string(text) {
+			pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
+		}
+		pc.textBuffer = nil
+	}
+
+	pc.lastList = append(pc.lastList, string(text))
+	log.Println("ListItem", string(text), flags)
+	return
+}
+
+func (pc *PresentContent) Paragraph(out *bytes.Buffer, text func() bool) {
+	content, extracted := extractText(out, text)
+	if !extracted {
+		return
+	}
+
+	if pc.textBuffer != nil {
+		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
+		pc.textBuffer = nil
+	}
+
+	txt := Text{
+		Lines: splitLines(content),
+	}
+	pc.textBuffer = &txt
+	// pc.lastSection.Elem = append(pc.lastSection.Elem, txt)
+	log.Println("Paragraph", string(out.Bytes()))
+	return
+}
+
+func splitLines(txt string) (lines []string) {
+	txt = strings.Replace(txt, "\r", "", -1)
+	lines = strings.Split(txt, "\n")
+	return
+}
+
+func (pc *PresentContent) AutoLink(out *bytes.Buffer, link []byte, kind int) {
+	pc.Link(out, link, nil, nil)
+	return
+}
+
+func (pc *PresentContent) CodeSpan(out *bytes.Buffer, text []byte) {
+	out.WriteString("`")
+	out.WriteString(strings.Replace(string(text), " ", "`", -1))
+	out.WriteString("`")
+	log.Println("CodeSpan", string(text))
+	return
+}
+
+func (pc *PresentContent) DoubleEmphasis(out *bytes.Buffer, text []byte) {
+	pc.Emphasis(out, text)
+	log.Println("DoubleEmphasis", string(text))
+	return
+}
+
+func (pc *PresentContent) Emphasis(out *bytes.Buffer, text []byte) {
+	out.WriteString("*")
+	out.WriteString(strings.Replace(string(text), " ", "*", -1))
+	out.WriteString("*")
+	log.Println("Emphasis", string(text))
+	return
+}
+
+func (pc *PresentContent) Image(out *bytes.Buffer, link []byte, title []byte, alt []byte) {
+	img := Image{
+		URL: string(link),
+	}
+	pc.lastSection.Elem = append(pc.lastSection.Elem, img)
+	log.Println("Image", string(link), string(title), string(alt))
+	return
+}
+
+func (pc *PresentContent) Link(out *bytes.Buffer, link []byte, title []byte, content []byte) {
+	// pc.htmlRender.Link(out, link, title, content)
+	//[[url][label]]
+	out.WriteString("[[")
+	out.Write(link)
+	out.WriteString("][")
+	out.Write(content)
+	out.WriteString("]]")
+	log.Println("Link", string(link), string(title), string(content))
+	return
+}
+
+func (pc *PresentContent) RawHtmlTag(out *bytes.Buffer, text []byte) {
+	out.Write(text)
+	log.Println("RawHtmlTag", string(text))
+	return
+}
+
+func (pc *PresentContent) TripleEmphasis(out *bytes.Buffer, text []byte) {
+	pc.Emphasis(out, text)
+	log.Println("TripleEmphasis", string(text))
+	return
+}
+
+func (pc *PresentContent) StrikeThrough(out *bytes.Buffer, text []byte) {
+	out.Write(text)
+	log.Println("StrikeThrough", string(text))
+	return
+}
+
+func (pc *PresentContent) Entity(out *bytes.Buffer, entity []byte) {
+	out.Write(entity)
+	log.Println("Entity", string(entity))
+	return
+}
+
+func (pc *PresentContent) NormalText(out *bytes.Buffer, text []byte) {
+	out.Write(text)
+	log.Println("NormalText", string(text))
+	return
+}
+
+// ================================================
+
 func (pc *PresentContent) BlockHtml(out *bytes.Buffer, text []byte) {
 	log.Println("BlockHtml", string(text))
 	return
@@ -94,13 +237,7 @@ func (pc *PresentContent) HRule(out *bytes.Buffer) {
 	return
 }
 
-func (pc *PresentContent) BlockCode(out *bytes.Buffer, text []byte, lang string) {
-	code := Code{
-		Text: template.HTML(cleanEscapeHighlightCode(text, "")),
-	}
-
-	pc.lastSection.Elem = append(pc.lastSection.Elem, code)
-	log.Println("BlockCode", string(text), lang)
+func (pc *PresentContent) LineBreak(out *bytes.Buffer) {
 	return
 }
 
@@ -131,119 +268,6 @@ func (pc *PresentContent) TableRow(out *bytes.Buffer, text []byte) {
 
 func (pc *PresentContent) TableCell(out *bytes.Buffer, text []byte, align int) {
 	log.Println("TableCell", string(text), align)
-	return
-}
-
-func (pc *PresentContent) List(out *bytes.Buffer, text func() bool, flags int) {
-	_, extracted := textExtract(out, text)
-	if !extracted {
-		return
-	}
-	list := List{
-		Bullet: pc.lastList,
-	}
-	pc.lastSection.Elem = append(pc.lastSection.Elem, list)
-	pc.lastList = []string{}
-	log.Println("List", flags)
-	return
-}
-
-func (pc *PresentContent) ListItem(out *bytes.Buffer, text []byte, flags int) {
-	pc.lastList = append(pc.lastList, string(text))
-	log.Println("ListItem", string(text), flags)
-	return
-}
-
-func (pc *PresentContent) Paragraph(out *bytes.Buffer, text func() bool) {
-
-	content, extracted := textExtract(out, text)
-	if !extracted {
-		return
-	}
-
-	txt := Text{
-		Lines: splitLines(content),
-	}
-	pc.lastSection.Elem = append(pc.lastSection.Elem, txt)
-	log.Println("Paragraph")
-	return
-}
-
-func (pc *PresentContent) AutoLink(out *bytes.Buffer, link []byte, kind int) {
-	pc.Link(out, link, nil, nil)
-	return
-}
-
-func (pc *PresentContent) CodeSpan(out *bytes.Buffer, text []byte) {
-	out.WriteString("`")
-	out.WriteString(strings.Replace(string(text), " ", "`", -1))
-	out.WriteString("`")
-	log.Println("CodeSpan", string(text))
-	return
-}
-
-func (pc *PresentContent) DoubleEmphasis(out *bytes.Buffer, text []byte) {
-	pc.Emphasis(out, text)
-	return
-}
-
-func (pc *PresentContent) Emphasis(out *bytes.Buffer, text []byte) {
-	out.WriteString("*")
-	out.WriteString(strings.Replace(string(text), " ", "*", -1))
-	out.WriteString("*")
-	return
-}
-
-func (pc *PresentContent) Image(out *bytes.Buffer, link []byte, title []byte, alt []byte) {
-	img := Image{
-		URL: string(link),
-	}
-	pc.lastSection.Elem = append(pc.lastSection.Elem, img)
-	log.Println("Image", string(link), string(title), string(alt))
-	return
-}
-
-func (pc *PresentContent) LineBreak(out *bytes.Buffer) {
-	return
-}
-
-func (pc *PresentContent) Link(out *bytes.Buffer, link []byte, title []byte, content []byte) {
-	// pc.htmlRender.Link(out, link, title, content)
-	//[[url][label]]
-	out.WriteString("[[")
-	out.Write(link)
-	out.WriteString("][")
-	out.Write(content)
-	out.WriteString("]]")
-	log.Println("Link", string(link), string(title), string(content))
-	return
-}
-
-func (pc *PresentContent) RawHtmlTag(out *bytes.Buffer, text []byte) {
-	out.Write(text)
-	return
-}
-
-func (pc *PresentContent) TripleEmphasis(out *bytes.Buffer, text []byte) {
-	pc.Emphasis(out, text)
-	return
-}
-
-func (pc *PresentContent) StrikeThrough(out *bytes.Buffer, text []byte) {
-	out.Write(text)
-	log.Println("StrikeThrough", string(text))
-	return
-}
-
-func (pc *PresentContent) Entity(out *bytes.Buffer, entity []byte) {
-	out.Write(entity)
-	log.Println("Entity", string(entity))
-	return
-}
-
-func (pc *PresentContent) NormalText(out *bytes.Buffer, text []byte) {
-	out.Write(text)
-	log.Println("NormalText", string(text))
 	return
 }
 
