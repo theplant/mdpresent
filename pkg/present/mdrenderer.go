@@ -109,12 +109,10 @@ func (pc *PresentContent) List(out *bytes.Buffer, text func() bool, flags int) {
 }
 
 func (pc *PresentContent) ListItem(out *bytes.Buffer, text []byte, flags int) {
-	if pc.textBuffer != nil {
-		if len(pc.textBuffer.Lines) == 0 || pc.textBuffer.Lines[0] != string(text) {
-			pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
-		}
-		pc.textBuffer = nil
+	if pc.textBuffer != nil && pc.textBuffer.originText != string(text) {
+		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
 	}
+	pc.textBuffer = nil
 
 	pc.lastList = append(pc.lastList, string(text))
 	log.Println("ListItem", string(text), flags)
@@ -133,7 +131,8 @@ func (pc *PresentContent) Paragraph(out *bytes.Buffer, text func() bool) {
 	}
 
 	txt := Text{
-		Lines: splitLines(content),
+		Lines:      splitLines(content),
+		originText: content,
 	}
 	pc.textBuffer = &txt
 	// pc.lastSection.Elem = append(pc.lastSection.Elem, txt)

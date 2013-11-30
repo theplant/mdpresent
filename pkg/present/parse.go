@@ -147,8 +147,9 @@ func execTemplate(t *template.Template, name string, data interface{}) (template
 
 // Text represents an optionally preformatted paragraph.
 type Text struct {
-	Lines []string
-	Pre   bool
+	Lines      []string
+	originText string
+	Pre        bool
 }
 
 func (t Text) TemplateName() string { return "text" }
