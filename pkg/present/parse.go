@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/russross/blackfriday"
+	"github.com/theplant/blackfriday"
 	"html/template"
 	"io"
 	"io/ioutil"
