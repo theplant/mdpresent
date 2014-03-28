@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/theplant/blackfriday"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -16,6 +15,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/theplant/blackfriday"
 )
 
 var (

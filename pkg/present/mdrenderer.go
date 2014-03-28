@@ -2,10 +2,11 @@ package present
 
 import (
 	"bytes"
-	"github.com/russross/blackfriday"
 	"html/template"
 	"log"
 	"strings"
+
+	"github.com/theplant/blackfriday"
 )
 
 type PresentContent struct {
@@ -24,6 +25,10 @@ func PresentContentRenderer(flags int) (r *PresentContent) {
 }
 
 func (pc *PresentContent) Sections() (r []Section) {
+	if pc.lastSection != nil && pc.textBuffer != nil {
+		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
+		pc.textBuffer = nil
+	}
 	for _, s := range pc.sections {
 		r = append(r, *s)
 	}
