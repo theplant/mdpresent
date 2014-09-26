@@ -268,7 +268,9 @@ func parseMarkdownSections(name string, lines *Lines, number []int, doc *Doc) (r
 	extensions |= blackfriday.EXTENSION_FENCED_CODE
 	extensions |= blackfriday.EXTENSION_AUTOLINK
 	extensions |= blackfriday.EXTENSION_STRIKETHROUGH
-	extensions |= blackfriday.EXTENSION_SPACE_HEADERS
+	extensions |= blackfriday.EXTENSION_UNICODE_LIST_ITEM
+	extensions |= blackfriday.EXTENSION_NO_LIST_ITEM_BLOCK
+	// extensions |= blackfriday.EXTENSION_SPACE_HEADERS  // to make sure that only "#\n\n" with empty titles also generate <h1></h1> works.
 	blackfriday.Markdown(body, renderer, extensions)
 	r = renderer.Sections()
 

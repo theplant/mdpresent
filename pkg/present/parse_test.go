@@ -6,7 +6,41 @@ import (
 	"testing"
 )
 
-var fixtures = []string{`presentation
+var imageTextImage = []string{
+	`bbb
+9/24/2014
+
+Felix Sun
+
+
+
+#
+
+![](/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/5422741b6c08982b400000be/m/undefined "undefined")
+
+He Orders a beer.
+
+![](/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/542274696c08982b400000da/m/undefined "undefined")
+
+# He Orders 0 beers.
+
+# Orders 999999999 beers.
+
+![](/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/542274766c08982b400000e2/m/undefined "undefined")
+
+# Orders a lizard.
+
+![](/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/542274896c08982b400000f6/m/undefined "undefined")
+
+# Orders -1 beers.
+
+# Orders a sfdeljkn`,
+
+	`{"Title":"bbb","Subtitle":"9/24/2014","Time":"0001-01-01T00:00:00Z","Authors":[{"Elem":[{"Lines":["Felix Sun"],"Pre":false}]},{"Elem":[{"Lines":[""],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"","Elem":[{"URL":"/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/5422741b6c08982b400000be/m/undefined","Width":0,"Height":0},{"Lines":["He Orders a beer."],"Pre":false},{"URL":"/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/542274696c08982b400000da/m/undefined","Width":0,"Height":0}]},{"Number":[2],"Title":"He Orders 0 beers.","Elem":null},{"Number":[3],"Title":"Orders 999999999 beers.","Elem":[{"URL":"/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/542274766c08982b400000e2/m/undefined","Width":0,"Height":0}]},{"Number":[4],"Title":"Orders a lizard.","Elem":[{"URL":"/5018d345558fbe46c4000001/537f27fc18c8bca41a000010/file/542274896c08982b400000f6/m/undefined","Width":0,"Height":0}]},{"Number":[5],"Title":"Orders -1 beers.","Elem":null},{"Number":[6],"Title":"Orders a sfdeljkn","Elem":null}]}`,
+}
+
+var chineseTitleAndList = []string{
+	`presentation
 14:59 22 Nov 2013
 
 Van5 Hu
@@ -32,59 +66,59 @@ Van5 Hu
 
 # 通讯补贴 200元/月，当月出勤需在15天以上；
 # 出差补贴 80元/天。
-`, `presentation
-14:59 22 Nov 2013
+`,
 
-Van5 Hu
-# header1
+	`{"Title":"presentation","Subtitle":"","Time":"2013-11-22T14:59:00Z","Authors":[{"Elem":[{"Lines":["Van5 Hu"],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"渠道薪资待遇","Elem":null},{"Number":[2],"Title":"提成：到账金额*提成比例","Elem":[{"Bullet":["当月到账预存款金额"]}]},{"Number":[3],"Title":"提成比例","Elem":[{"Bullet":["到账金额≥15万\n4.00%","10万≤到账金额＜15万\n3.00%","5万≤到账金额＜10万\n2.50%","到账金额＜5万\n2.00%"]}]},{"Number":[4],"Title":"通讯补贴 200元/月，当月出勤需在15天以上；","Elem":null},{"Number":[5],"Title":"出差补贴 80元/天。","Elem":null}]}`,
+}
 
-test
+var spaceBetweenListItem = []string{
+	`Head
+16:13 28 Nov 2013
+Author
+# Title
+* a point
 
-# header2
+* second point
 
-test2
-`}
+* third point`,
 
-var results = []string{`{"Title":"presentation","Subtitle":"","Time":"2013-11-22T14:59:00Z","Authors":[{"Elem":[{"Lines":["Van5 Hu"],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"渠道薪资待遇","Elem":null},{"Number":[2],"Title":"提成：到账金额*提成比例","Elem":[{"Bullet":["当月到账预存款金额"]}]},{"Number":[3],"Title":"提成比例","Elem":[{"Bullet":["到账金额≥15万\n4.00%","10万≤到账金额＜15万\n3.00%","5万≤到账金额＜10万\n2.50%","到账金额＜5万\n2.00%"]}]},{"Number":[4],"Title":"通讯补贴 200元/月，当月出勤需在15天以上；","Elem":null},{"Number":[5],"Title":"出差补贴 80元/天。","Elem":null}]}`, `{"Title":"presentation","Subtitle":"","Time":"2013-11-22T14:59:00Z","Authors":[{"Elem":[{"Lines":["Van5 Hu"],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"header1","Elem":[{"Lines":["test"],"Pre":false}]},{"Number":[2],"Title":"header2","Elem":[{"Lines":["test2"],"Pre":false}]}]}`}
+	`{"Title":"Head","Subtitle":"","Time":"2013-11-28T16:13:00Z","Authors":[{"Elem":[{"Lines":["Author"],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"Title","Elem":[{"Bullet":["a point","second point","third point"]}]}]}`,
+}
+
+var noSpaceBetweenListItem = []string{
+	`Head
+16:13 28 Nov 2013
+Author
+# Title
+* a point
+* second point
+* third point
+
+Everything I know.
+`,
+
+	`{"Title":"Head","Subtitle":"","Time":"2013-11-28T16:13:00Z","Authors":[{"Elem":[{"Lines":["Author"],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"Title","Elem":[{"Bullet":["a point","second point","third point"]},{"Lines":["Everything I know."],"Pre":false}]}]}`,
+}
+
+var fixtures = [][]string{
+	imageTextImage,
+	chineseTitleAndList,
+	spaceBetweenListItem,
+	noSpaceBetweenListItem,
+}
 
 func TestParseSeperateListItems(t *testing.T) {
-	for i, fixture := range fixtures {
-		result := results[i]
-		r := strings.NewReader(fixture)
+	for _, fixture := range fixtures {
+		result := fixture[1]
+		r := strings.NewReader(fixture[0])
 		doc, err := Parse(r, "test", 0)
 		if err != nil {
 			panic(err)
 		}
-		expected, _ := json.Marshal(doc)
-		if string(expected) != result {
-			t.Error("Do not generate expected result")
+		actual, _ := json.Marshal(doc)
+		if string(actual) != result {
+			t.Error("Do not generate expected result actual: \n", string(actual))
 		}
 	}
 
-	// if len(doc.Sections) != 4 {
-	// 	t.Error("Should only parse out four sections, but have ", len(doc.Sections))
-	// }
-	// if len(doc.Sections[1].Elem) != 1 && len(doc.Sections[1].Elem) == 4 {
-	// 	t.Errorf("Should only parse out a list with 4 bullets, but have %+v\n", len(doc.Sections[1].Elem))
-	// }
 }
-
-// var fixture2 = `Head
-// 16:13 28 Nov 2013
-// Author
-// # Title
-// * a point
-// * second point
-// * third point
-
-// Everything I know.
-// `
-
-// func TestParseCompactListItems(t *testing.T) {
-// 	r := strings.NewReader(fixture2)
-// 	doc, err := Parse(r, "test", 0)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Printf("%+v\n", doc)
-// }

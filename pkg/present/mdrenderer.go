@@ -16,7 +16,6 @@ type PresentContent struct {
 	lastSection       *Section
 	lastList          []string
 	lastSectionNumber []int
-	textBuffer        *Text
 }
 
 func PresentContentRenderer(flags int) (r *PresentContent) {
@@ -25,10 +24,6 @@ func PresentContentRenderer(flags int) (r *PresentContent) {
 }
 
 func (pc *PresentContent) Sections() (r []Section) {
-	if pc.lastSection != nil && pc.textBuffer != nil {
-		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
-		pc.textBuffer = nil
-	}
 	for _, s := range pc.sections {
 		r = append(r, *s)
 	}
@@ -37,14 +32,11 @@ func (pc *PresentContent) Sections() (r []Section) {
 
 func (pc *PresentContent) Header(out *bytes.Buffer, text func() bool, level int) {
 	// pc.htmlRender.Header(content, text, level)
+	println("Header!!")
 	content, extracted := extractText(out, text)
 	if !extracted {
-		return
-	}
-
-	if pc.lastSection != nil && pc.textBuffer != nil {
-		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
-		pc.textBuffer = nil
+		content = ""
+		// return
 	}
 
 	pc.lastSection = &Section{
@@ -58,6 +50,16 @@ func (pc *PresentContent) Header(out *bytes.Buffer, text func() bool, level int)
 		pc.parentSection = pc.lastSection
 	}
 	log.Println("Header", content)
+}
+
+func (pc *PresentContent) makeLastSectionIfEmpty() {
+	if pc.lastSection != nil {
+		return
+	}
+	pc.lastSection = &Section{
+		Number: []int{1},
+		Title:  "",
+	}
 }
 
 func extractText(out *bytes.Buffer, text func() bool) (r string, extracted bool) {
@@ -94,6 +96,8 @@ func (pc *PresentContent) BlockCode(out *bytes.Buffer, text []byte, lang string)
 		Text: template.HTML(cleanEscapeHighlightCode(text, "")),
 	}
 
+	pc.makeLastSectionIfEmpty()
+
 	pc.lastSection.Elem = append(pc.lastSection.Elem, code)
 	log.Println("BlockCode", string(text), lang)
 	return
@@ -107,6 +111,8 @@ func (pc *PresentContent) List(out *bytes.Buffer, text func() bool, flags int) {
 	list := List{
 		Bullet: pc.lastList,
 	}
+	pc.makeLastSectionIfEmpty()
+
 	pc.lastSection.Elem = append(pc.lastSection.Elem, list)
 	pc.lastList = []string{}
 	log.Println("List", flags)
@@ -114,10 +120,6 @@ func (pc *PresentContent) List(out *bytes.Buffer, text func() bool, flags int) {
 }
 
 func (pc *PresentContent) ListItem(out *bytes.Buffer, text []byte, flags int) {
-	if pc.textBuffer != nil && pc.textBuffer.originText != string(text) {
-		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
-	}
-	pc.textBuffer = nil
 
 	pc.lastList = append(pc.lastList, string(text))
 	log.Println("ListItem", string(text), flags)
@@ -130,17 +132,16 @@ func (pc *PresentContent) Paragraph(out *bytes.Buffer, text func() bool) {
 		return
 	}
 
-	if pc.textBuffer != nil {
-		pc.lastSection.Elem = append(pc.lastSection.Elem, *pc.textBuffer)
-		pc.textBuffer = nil
+	if len(content) == 0 {
+		return
 	}
 
 	txt := Text{
 		Lines:      splitLines(content),
 		originText: content,
 	}
-	pc.textBuffer = &txt
-	// pc.lastSection.Elem = append(pc.lastSection.Elem, txt)
+
+	pc.lastSection.Elem = append(pc.lastSection.Elem, txt)
 	log.Println("Paragraph", string(out.Bytes()))
 	return
 }
@@ -182,6 +183,7 @@ func (pc *PresentContent) Image(out *bytes.Buffer, link []byte, title []byte, al
 	img := Image{
 		URL: string(link),
 	}
+	pc.makeLastSectionIfEmpty()
 	pc.lastSection.Elem = append(pc.lastSection.Elem, img)
 	log.Println("Image", string(link), string(title), string(alt))
 	return
