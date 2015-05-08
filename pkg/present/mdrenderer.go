@@ -3,7 +3,6 @@ package present
 import (
 	"bytes"
 	"html/template"
-	"log"
 	"strings"
 
 	"github.com/theplant/blackfriday"
@@ -32,7 +31,7 @@ func (pc *PresentContent) Sections() (r []Section) {
 
 func (pc *PresentContent) Header(out *bytes.Buffer, text func() bool, level int) {
 	// pc.htmlRender.Header(content, text, level)
-	println("Header!!")
+	// println("Header!!")
 	content, extracted := extractText(out, text)
 	if !extracted {
 		content = ""
@@ -49,7 +48,7 @@ func (pc *PresentContent) Header(out *bytes.Buffer, text func() bool, level int)
 	if pc.parentSection == nil || len(pc.parentSection.Number) < level {
 		pc.parentSection = pc.lastSection
 	}
-	log.Println("Header", content)
+	// log.Println("Header", content)
 }
 
 func (pc *PresentContent) makeLastSectionIfEmpty() {
@@ -99,7 +98,7 @@ func (pc *PresentContent) BlockCode(out *bytes.Buffer, text []byte, lang string)
 	pc.makeLastSectionIfEmpty()
 
 	pc.lastSection.Elem = append(pc.lastSection.Elem, code)
-	log.Println("BlockCode", string(text), lang)
+	// log.Println("BlockCode", string(text), lang)
 	return
 }
 
@@ -115,14 +114,14 @@ func (pc *PresentContent) List(out *bytes.Buffer, text func() bool, flags int) {
 
 	pc.lastSection.Elem = append(pc.lastSection.Elem, list)
 	pc.lastList = []string{}
-	log.Println("List", flags)
+	// log.Println("List", flags)
 	return
 }
 
 func (pc *PresentContent) ListItem(out *bytes.Buffer, text []byte, flags int) {
 
 	pc.lastList = append(pc.lastList, string(text))
-	log.Println("ListItem", string(text), flags)
+	// log.Println("ListItem", string(text), flags)
 	return
 }
 
@@ -142,7 +141,7 @@ func (pc *PresentContent) Paragraph(out *bytes.Buffer, text func() bool) {
 	}
 
 	pc.lastSection.Elem = append(pc.lastSection.Elem, txt)
-	log.Println("Paragraph", string(out.Bytes()))
+	// log.Println("Paragraph", string(out.Bytes()))
 	return
 }
 
@@ -161,13 +160,13 @@ func (pc *PresentContent) CodeSpan(out *bytes.Buffer, text []byte) {
 	out.WriteString("`")
 	out.WriteString(strings.Replace(string(text), " ", "`", -1))
 	out.WriteString("`")
-	log.Println("CodeSpan", string(text))
+	// log.Println("CodeSpan", string(text))
 	return
 }
 
 func (pc *PresentContent) DoubleEmphasis(out *bytes.Buffer, text []byte) {
 	pc.Emphasis(out, text)
-	log.Println("DoubleEmphasis", string(text))
+	// log.Println("DoubleEmphasis", string(text))
 	return
 }
 
@@ -175,7 +174,7 @@ func (pc *PresentContent) Emphasis(out *bytes.Buffer, text []byte) {
 	out.WriteString("*")
 	out.WriteString(strings.Replace(string(text), " ", "*", -1))
 	out.WriteString("*")
-	log.Println("Emphasis", string(text))
+	// log.Println("Emphasis", string(text))
 	return
 }
 
@@ -185,7 +184,7 @@ func (pc *PresentContent) Image(out *bytes.Buffer, link []byte, title []byte, al
 	}
 	pc.makeLastSectionIfEmpty()
 	pc.lastSection.Elem = append(pc.lastSection.Elem, img)
-	log.Println("Image", string(link), string(title), string(alt))
+	// log.Println("Image", string(link), string(title), string(alt))
 	return
 }
 
@@ -197,49 +196,49 @@ func (pc *PresentContent) Link(out *bytes.Buffer, link []byte, title []byte, con
 	out.WriteString("][")
 	out.Write(content)
 	out.WriteString("]]")
-	log.Println("Link", string(link), string(title), string(content))
+	// log.Println("Link", string(link), string(title), string(content))
 	return
 }
 
 func (pc *PresentContent) RawHtmlTag(out *bytes.Buffer, text []byte) {
 	out.Write(text)
-	log.Println("RawHtmlTag", string(text))
+	// log.Println("RawHtmlTag", string(text))
 	return
 }
 
 func (pc *PresentContent) TripleEmphasis(out *bytes.Buffer, text []byte) {
 	pc.Emphasis(out, text)
-	log.Println("TripleEmphasis", string(text))
+	// log.Println("TripleEmphasis", string(text))
 	return
 }
 
 func (pc *PresentContent) StrikeThrough(out *bytes.Buffer, text []byte) {
 	out.Write(text)
-	log.Println("StrikeThrough", string(text))
+	// log.Println("StrikeThrough", string(text))
 	return
 }
 
 func (pc *PresentContent) Entity(out *bytes.Buffer, entity []byte) {
 	out.Write(entity)
-	log.Println("Entity", string(entity))
+	// log.Println("Entity", string(entity))
 	return
 }
 
 func (pc *PresentContent) NormalText(out *bytes.Buffer, text []byte) {
 	out.Write(text)
-	log.Println("NormalText", string(text))
+	// log.Println("NormalText", string(text))
 	return
 }
 
 // ================================================
 
 func (pc *PresentContent) BlockHtml(out *bytes.Buffer, text []byte) {
-	log.Println("BlockHtml", string(text))
+	// log.Println("BlockHtml", string(text))
 	return
 }
 
 func (pc *PresentContent) HRule(out *bytes.Buffer) {
-	log.Println("HRule")
+	// log.Println("HRule")
 	return
 }
 
@@ -248,71 +247,71 @@ func (pc *PresentContent) LineBreak(out *bytes.Buffer) {
 }
 
 func (pc *PresentContent) BlockCodeNormal(out *bytes.Buffer, text []byte, lang string) {
-	log.Println("BlockCodeNormal", string(text), lang)
+	// log.Println("BlockCodeNormal", string(text), lang)
 	return
 }
 
 func (pc *PresentContent) BlockCodeGithub(out *bytes.Buffer, text []byte, lang string) {
-	log.Println("BlockCodeGithub", string(text), lang)
+	// log.Println("BlockCodeGithub", string(text), lang)
 	return
 }
 
 func (pc *PresentContent) BlockQuote(out *bytes.Buffer, text []byte) {
-	log.Println("BlockQuote", string(text))
+	// log.Println("BlockQuote", string(text))
 	return
 }
 
 func (pc *PresentContent) Table(out *bytes.Buffer, header []byte, body []byte, columnData []int) {
-	log.Println("Table", string(header), string(body), columnData)
+	// log.Println("Table", string(header), string(body), columnData)
 	return
 }
 
 func (pc *PresentContent) TableRow(out *bytes.Buffer, text []byte) {
-	log.Println("TableRow", string(text))
+	// log.Println("TableRow", string(text))
 	return
 }
 
 func (pc *PresentContent) TableCell(out *bytes.Buffer, text []byte, align int) {
-	log.Println("TableCell", string(text), align)
+	// log.Println("TableCell", string(text), align)
 	return
 }
 
 func (pc *PresentContent) Smartypants(out *bytes.Buffer, text []byte) {
-	log.Println("Smartypants")
+	// log.Println("Smartypants")
 	return
 }
 
 func (pc *PresentContent) DocumentHeader(out *bytes.Buffer) {
-	log.Println("DocumentHeader")
+	// log.Println("DocumentHeader")
 	return
 }
 
 func (pc *PresentContent) DocumentFooter(out *bytes.Buffer) {
-	log.Println("DocumentFooter")
+	// log.Println("DocumentFooter")
 	return
 }
 
 func (pc *PresentContent) TocHeader(text []byte, level int) {
-	log.Println("TocHeader", string(text), level)
+	// log.Println("TocHeader", string(text), level)
 	return
 }
 
 func (pc *PresentContent) TocFinalize() {
-	log.Println("TocFinalize")
+	// log.Println("TocFinalize")
 	return
 }
 
 func (pc *PresentContent) FootnoteItem(out *bytes.Buffer, name, text []byte, flags int) {
-	log.Println("FootnoteItem")
+	// log.Println("FootnoteItem")
 	return
 }
 
 func (pc *PresentContent) FootnoteRef(out *bytes.Buffer, ref []byte, id int) {
-	log.Println("FootnoteRef")
+	// log.Println("FootnoteRef")
 	return
 }
 
 func (pc *PresentContent) Footnotes(out *bytes.Buffer, text func() bool) {
-	log.Println("Footnotes")
+	// log.Println("Footnotes")
 	return
 }

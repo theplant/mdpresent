@@ -252,7 +252,7 @@ func lineBytes(lines *Lines) (r []byte) {
 // parseSections parses Sections from lines for the section level indicated by
 // number (a nil number indicates the top level).
 func parseMarkdownSections(name string, lines *Lines, number []int, doc *Doc) (r []Section, err error) {
-	log.Println("starting parseMarkdownSections")
+	// log.Println("starting parseMarkdownSections")
 	body := lineBytes(lines)
 
 	// set up the HTML renderer
