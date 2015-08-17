@@ -100,11 +100,24 @@ Everything I know.
 	`{"Title":"Head","Subtitle":"","Time":"2013-11-28T16:13:00Z","Authors":[{"Elem":[{"Lines":["Author"],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"Title","Elem":[{"Bullet":["a point","second point","third point"]},{"Lines":["Everything I know."],"Pre":false}]}]}`,
 }
 
+var boldError = []string{
+	`Head
+16:13 28 Nov 2013
+Author
+# Title
+
+hello**bb**hi https://qortex.cn
+`,
+
+	`{"Title":"Head","Subtitle":"","Time":"2013-11-28T16:13:00Z","Authors":[{"Elem":[{"Lines":["Author"],"Pre":false}]}],"Sections":[{"Number":[1],"Title":"Title","Elem":[{"Lines":["hello *bb* hi [[https://qortex.cn][https://qortex.cn]]"],"Pre":false}]}]}`,
+}
+
 var fixtures = [][]string{
 	imageTextImage,
 	chineseTitleAndList,
 	spaceBetweenListItem,
 	noSpaceBetweenListItem,
+	boldError,
 }
 
 func TestParseSeperateListItems(t *testing.T) {

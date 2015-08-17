@@ -165,15 +165,17 @@ func (pc *PresentContent) CodeSpan(out *bytes.Buffer, text []byte) {
 }
 
 func (pc *PresentContent) DoubleEmphasis(out *bytes.Buffer, text []byte) {
-	pc.Emphasis(out, text)
+	out.WriteString(" *")
+	out.WriteString(string(text))
+	out.WriteString("* ")
 	// log.Println("DoubleEmphasis", string(text))
 	return
 }
 
 func (pc *PresentContent) Emphasis(out *bytes.Buffer, text []byte) {
-	out.WriteString("*")
-	out.WriteString(strings.Replace(string(text), " ", "*", -1))
-	out.WriteString("*")
+	out.WriteString(" _")
+	out.WriteString(string(text))
+	out.WriteString("_ ")
 	// log.Println("Emphasis", string(text))
 	return
 }
@@ -194,7 +196,12 @@ func (pc *PresentContent) Link(out *bytes.Buffer, link []byte, title []byte, con
 	out.WriteString("[[")
 	out.Write(link)
 	out.WriteString("][")
-	out.Write(content)
+	if len(content) == 0 {
+		out.Write(link)
+	} else {
+		out.Write(content)
+	}
+
 	out.WriteString("]]")
 	// log.Println("Link", string(link), string(title), string(content))
 	return
